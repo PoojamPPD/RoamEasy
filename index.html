@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RoamEasy — Tourism Trip Planner (Prototype)</title>
+<style>
+:root{
+  --forest:#1F3D2B; --forest-d:#16291C; --forest-l:#3E6B4F;
+  --cream:#F8F2E4; --surface:#FFFFFF; --surface-2:#F4EFE2;
+  --terra:#C97C5D; --terra-d:#A85C3F;
+  --text:#2B2B2A; --muted:#7A7770; --border:#E4DBC8;
+  --radius:10px;
+}
+:root:not([data-theme="light"]){
+  @media (prefers-color-scheme: dark){
+    --forest:#4C8A63; --forest-d:#2E6B45; --forest-l:#69A882;
+    --cream:#1B1A17; --surface:#242220; --surface-2:#2C2A26;
+    --terra:#E09774; --terra-d:#C97C5D;
+    --text:#EFEAE0; --muted:#A9A296; --border:#3A362F;
+  }
+}
+:root[data-theme="dark"]{
+  --forest:#4C8A63; --forest-d:#2E6B45; --forest-l:#69A882;
+  --cream:#1B1A17; --surface:#242220; --surface-2:#2C2A26;
+  --terra:#E09774; --terra-d:#C97C5D;
+  --text:#EFEAE0; --muted:#A9A296; --border:#3A362F;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:70px}
+html,body{height:100%}
+body{
+  margin:0; font-family:-apple-system,'Inter',Poppins,Manrope,sans-serif;
+  background:var(--cream); color:var(--text);
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+img,svg{max-width:100%}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+a{color:inherit}
+header.top{
+  position:sticky; top:0; top:env(safe-area-inset-top,0px);
+  background:var(--surface); border-bottom:1px solid var(--border); z-index:50;
+}
+.navbar{display:flex;align-items:center;gap:28px;padding:14px 24px;max-width:1120px;margin:0 auto;flex-wrap:wrap}
+.brand{font-weight:700;font-size:18px;color:var(--forest-d);letter-spacing:.2px;margin-right:auto;cursor:pointer;display:flex;align-items:center;gap:8px}
+.brand svg{width:22px;height:22px}
+nav.links{display:flex;gap:22px;flex-wrap:wrap}
+nav.links button{background:none;border:none;font:inherit;font-size:14.5px;color:var(--muted);cursor:pointer;padding:4px 0;border-bottom:2px solid transparent}
+nav.links button.active{color:var(--forest-d);font-weight:700;border-color:var(--forest-d)}
+.searchicon{border:none;background:none;cursor:pointer;color:var(--text);font-size:17px}
+main{padding-bottom:60px}
+.screen{display:none}
+.screen.active{display:block}
+h1{font-size:30px;margin:0 0 6px}
+h2{font-size:21px;margin:0 0 14px}
+h3{font-size:15px;margin:0 0 4px}
+p{line-height:1.55;color:var(--muted)}
+.btn{border-radius:var(--radius);padding:12px 22px;font-weight:700;font-size:14px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
+.btn:hover{border-color:var(--forest)}
+.btn.primary{background:var(--forest-d);border-color:var(--forest-d);color:#fff}
+.btn.primary:hover{background:var(--forest)}
+.btn.small{padding:8px 14px;font-size:12.5px;width:100%}
+.pill{border-radius:999px;padding:8px 16px;font-size:13px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
+.pill.active{background:var(--forest-d);border-color:var(--forest-d);color:#fff}
+.pillrow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+.hero{display:flex;gap:40px;align-items:center;padding:40px 0 30px;flex-wrap:wrap}
+.imgph{
+  background:linear-gradient(135deg,var(--surface-2),var(--border));
+  border-radius:var(--radius); display:flex;align-items:center;justify-content:center;
+  color:var(--muted); flex-shrink:0; position:relative; overflow:hidden;
+}
+.imgph svg{width:34%;opacity:.55}
+  .imgph img{width:100%;height:100%;object-fit:cover;display:block}
+  .hero .imgph{flex:1 1 440px;height:260px;min-width:280px}
+  .hero .imgph img{filter:saturate(.9)}
+  .dest-card .imgph img{transition:transform .25s ease}
+  .dest-card:hover .imgph img{transform:scale(1.04)}
+  .details-image{height:260px;margin-bottom:22px}
+  .details-image img{width:100%;height:100%;object-fit:cover}
+.hero .copy{flex:1 1 360px}
+.hero .copy p{margin:12px 0 20px;max-width:44ch}
+.actions{display:flex;gap:12px;flex-wrap:wrap}
+section{padding:26px 0}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:820px){.grid4{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.card:hover{border-color:var(--forest)}
+.card .imgph{height:100px;border-radius:0}
+.card .body{padding:14px 16px}
+.card .body p.mini{font-size:12px;margin:2px 0 0}
+.dest-card .imgph{height:150px;border-radius:0}
+.dest-card .body p{font-size:13px;margin:6px 0 12px}
+.loc{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:5px;margin:4px 0}
+.tagrow{display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px}
+.tag{background:var(--surface-2);border:1px solid var(--border);border-radius:999px;padding:3px 10px;font-size:11.5px;color:var(--muted)}
+.searchbar{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:999px;padding:10px 18px;background:var(--surface);margin-bottom:18px;max-width:560px}
+.searchbar input{border:none;outline:none;background:none;font:inherit;color:var(--text);flex:1}
+.filterrow{display:flex;gap:20px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.filtergroup{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.filtergroup label{font-size:12.5px;color:var(--muted)}
+select{border:1px solid var(--border);border-radius:8px;padding:7px 10px;font:inherit;background:var(--surface);color:var(--text)}
+.resultcount{font-size:13px;color:var(--muted);margin-bottom:14px}
+.quickinfo{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:24px 0}
+@media(max-width:820px){.quickinfo{grid-template-columns:repeat(2,1fr)}}
+.qcard{background:var(--surface-2);border-radius:var(--radius);padding:14px 16px}
+.qcard .lbl{font-size:11.5px;color:var(--muted)}
+.qcard .val{font-weight:700;font-size:14.5px;margin-top:3px}
+.actcard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.mapph{background:repeating-linear-gradient(0deg,var(--surface-2),var(--surface-2) 22px,var(--border) 23px),repeating-linear-gradient(90deg,transparent,transparent 39px,var(--border) 40px);border-radius:var(--radius);height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);font-size:13px;border:1px solid var(--border)}
+form .field{margin-bottom:26px}
+form label.grouplbl{display:block;font-weight:700;font-size:14px;margin-bottom:10px}
+.formrow{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}
+.formcol{flex:1 1 480px;min-width:280px}
+.summary{flex:0 1 300px;background:var(--surface-2);border-radius:12px;padding:20px;position:sticky;top:84px}
+.summary .row{display:flex;justify-content:space-between;font-size:13px;padding:9px 0;border-bottom:1px solid var(--border)}
+.summary .row span:last-child{font-weight:700;text-align:right}
+.checkgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:600px){.checkgrid{grid-template-columns:repeat(2,1fr)}}
+.checklabel{display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer}
+.checklabel input{accent-color:var(--forest-d);width:16px;height:16px}
+.err{color:var(--terra-d);font-size:12.5px;margin-top:6px;display:none}
+.planresult{display:none;background:var(--surface);border:1px solid var(--forest);border-radius:12px;padding:22px;margin-top:26px}
+.planresult h3{color:var(--forest-d)}
+footer.site{border-top:1px solid var(--border);padding:30px 0;margin-top:10px}
+.footgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+@media(max-width:600px){.footgrid{grid-template-columns:1fr}}
+.footgrid h4{margin:0 0 8px;font-size:13.5px}
+.footgrid p{font-size:12.5px;margin:3px 0}
+.pagenote{text-align:center;color:var(--muted);font-size:12.5px;margin-top:10px}
+.hint{font-size:12px;color:var(--muted);margin-top:-14px;margin-bottom:20px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="navbar">
+    <div class="brand" onclick="showScreen('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2 2 21h20L12 2Z"/><path d="M12 9v6"/></svg>
+      RoamEasy
+    </div>
+    <nav class="links">
+      <button data-target="home" class="active" onclick="showScreen('home')">Home</button>
+      <button data-target="explore" onclick="showScreen('explore')">Explore</button>
+      <button data-target="explore" onclick="showScreen('explore')">Destinations</button>
+      <button data-target="plan" onclick="showScreen('plan')">Plan Your Trip</button>
+      <button data-target="about" onclick="showScreen('about')">About</button>
+    </nav>
+    <button class="searchicon" aria-label="Search" onclick="showScreen('explore')">&#128269;</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section id="screen-home" class="screen active">
+  <div class="hero">
+    <div class="imgph"><img src="/images/mahabaleshwar.png" alt="Misty green hills of Mahabaleshwar" /></div>
+    <div class="copy">
+      <h1>Discover your next adventure</h1>
+      <p>Explore destinations, activities and experiences for your next trip.</p>
+      <div class="actions">
+        <button class="btn primary" onclick="showScreen('explore')">Explore destinations</button>
+        <button class="btn" onclick="showScreen('plan')">Plan your trip</button>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <h2>Explore by interest</h2>
+    <div class="grid4" id="interest-cards"></div>
+  </section>
+
+  <section>
+    <h2>Popular destinations</h2>
+    <div class="grid3" id="popular-cards"></div>
+  </section>
+</section>
+
+<section id="screen-explore" class="screen">
+  <h1>Explore destinations</h1>
+  <div class="searchbar">
+    <span>&#128269;</span>
+    <input id="search-input" type="text" placeholder="Search destinations..." oninput="applyFilters()">
+  </div>
+  <div class="filterrow">
+    <div class="filtergroup" id="category-pills"></div>
+    <div class="filtergroup">
+      <label>Budget up to</label>
+      <select id="budget-filter" onchange="applyFilters()">
+        <option value="99999">Any</option>
+        <option value="2000">Under &#8377;2,000</option>
+        <option value="3000">Under &#8377;3,000</option>
+        <option value="5000">Under &#8377;5,000</option>
+      </select>
+      <label>Sort by</label>
+      <select id="sort-filter" onchange="applyFilters()">
+        <option value="popular">Popular</option>
+        <option value="budget-asc">Budget: low to high</option>
+        <option value="budget-desc">Budget: high to low</option>
+        <option value="rating">Rating</option>
+      </select>
+    </div>
+  </div>
+  <div class="resultcount" id="result-count"></div>
+  <div class="grid3" id="explore-results"></div>
+  <p class="pagenote">&lsaquo;&nbsp; 1 &nbsp; 2 &nbsp; 3 &nbsp;&rsaquo;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0)" style="color:var(--forest-d);font-weight:700">Load more</a></p>
+</section>
+
+<section id="screen-details" class="screen">
+  <div class="imgph details-image"><img id="d-image" src="/images/mahabaleshwar.png" alt="" /></div>
+  <h1 id="d-name"></h1>
+  <p id="d-tagline" style="font-style:italic;margin-top:-6px"></p>
+  <div class="quickinfo">
+    <div class="qcard"><div class="lbl">Estimated budget</div><div class="val" id="d-budget"></div></div>
+    <div class="qcard"><div class="lbl">Duration</div><div class="val" id="d-duration"></div></div>
+    <div class="qcard"><div class="lbl">Best time</div><div class="val" id="d-besttime"></div></div>
+    <div class="qcard"><div class="lbl">Location</div><div class="val" id="d-location"></div></div>
+  </div>
+  <h2 id="d-about-h"></h2>
+  <p id="d-desc" style="max-width:74ch"></p>
+  <h2>Things to do</h2>
+  <div class="grid4" id="d-activities" style="margin-bottom:26px"></div>
+  <h2>Location</h2>
+  <div class="mapph">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="10" r="3"/><path d="M12 21s7-7.5 7-12a7 7 0 0 0-14 0c0 4.5 7 12 7 12Z"/></svg>
+    Map placeholder
+  </div>
+  <div class="actions" style="margin-top:22px">
+    <button class="btn primary" onclick="planTrip()">Plan my trip</button>
+    <button class="btn" id="save-btn" onclick="toggleSave()">Save destination</button>
+  </div>
+</section>
+
+<section id="screen-plan" class="screen">
+  <h1>Plan your trip</h1>
+  <p class="hint" style="margin-top:0">Tell us what kind of trip you want.</p>
+  <form class="formrow" onsubmit="return false">
+    <div class="formcol">
+      <div class="field">
+        <label class="grouplbl">Destination</label>
+        <select id="plan-destination" style="width:100%;padding:12px" onchange="hideErr()"></select>
+        <div class="err" id="dest-err">Select a destination first.</div>
+      </div>
+      <div class="field">
+        <label class="grouplbl">Trip duration</label>
+        <div class="pillrow" id="duration-pills"></div>
+      </div>
+      <div class="field">
+        <label class="grouplbl">Budget</label>
+        <div class="pillrow" id="planbudget-pills"></div>
+      </div>
+      <div class="field">
+        <label class="grouplbl">Travel type</label>
+        <div class="pillrow" id="traveltype-pills"></div>
+      </div>
+      <div class="field">
+        <label class="grouplbl">Interests</label>
+        <div class="checkgrid" id="interest-checks"></div>
+      </div>
+      <div class="field">
+        <label class="grouplbl">Accommodation</label>
+        <div class="pillrow" id="accom-pills"></div>
+      </div>
+      <button class="btn primary" onclick="createTrip()" type="button">Create my trip</button>
+    </div>
+    <div class="summary">
+      <h3>Trip summary</h3>
+      <div class="row"><span>Destination</span><span id="s-dest">&mdash;</span></div>
+      <div class="row"><span>Duration</span><span id="s-duration">&mdash;</span></div>
+      <div class="row"><span>Budget</span><span id="s-budget">&mdash;</span></div>
+      <div class="row"><span>Travel type</span><span id="s-travel">&mdash;</span></div>
+      <div class="row"><span>Activities</span><span id="s-activities">&mdash;</span></div>
+      <div class="row" style="border-bottom:none"><span>Accommodation</span><span id="s-accom">&mdash;</span></div>
+      <button class="btn primary small" style="margin-top:16px" onclick="viewTripPlan()">View trip plan</button>
+    </div>
+  </form>
+  <div class="planresult" id="plan-result">
+    <h3>Your trip plan is ready</h3>
+    <p id="plan-result-text"></p>
+    <button class="btn" onclick="resetPlan()">Start over</button>
+  </div>
+</section>
+
+<section id="screen-about" class="screen">
+  <h1>About RoamEasy</h1>
+  <p style="max-width:70ch">RoamEasy is a concept tourism website designed for young, budget-conscious travellers who want to discover and plan a weekend trip quickly, without digging through long menus or scattered information. This prototype demonstrates the core flow &mdash; discover, explore, view a destination and plan a trip &mdash; for usability testing.</p>
+</section>
+
+</main>
+
+<footer class="site wrap">
+  <div class="footgrid">
+    <div><h4>Quick links</h4><p>Home</p><p>Explore</p><p>Plan your trip</p></div>
+    <div><h4>Contact</h4><p>support@roameasy.example</p><p>+91 00000 00000</p></div>
+    <div><h4>Social media</h4><p>Instagram &middot; Twitter &middot; Facebook</p></div>
+  </div>
+</footer>
+
+<script>
+const destinations = [
+  {id:'mahabaleshwar',image:'/images/mahabaleshwar.png',name:'Mahabaleshwar',location:'Maharashtra',category:'Nature',budget:2500,budgetLabel:'\u20b92,500 \u2013 \u20b94,000',duration:'2\u20133 Days',bestTime:'Oct \u2013 Jun',tagline:'Popular hill station in Maharashtra',desc:'A popular hill station known for cool weather, viewpoints, strawberry farms and short nature trails \u2014 well suited for a quick weekend trip.',activities:['Nature Trails','Viewpoints','Local Food','Sightseeing']},
+  {id:'khajuraho',image:'/images/khajuraho.png',name:'Khajuraho',location:'Madhya Pradesh',category:'Heritage',budget:3200,budgetLabel:'\u20b93,000 \u2013 \u20b94,500',duration:'2 Days',bestTime:'Oct \u2013 Mar',tagline:'Temple town famous for its carved heritage architecture',desc:'Famous for intricately carved temples and centuries-old heritage architecture \u2014 an easy heritage-focused weekend trip.',activities:['Temple Tour','Light Show','Local Food','Museum Visit']},
+  {id:'pench',image:'/images/pench.png',name:'Pench National Park',location:'Madhya Pradesh',category:'Wildlife',budget:4000,budgetLabel:'\u20b93,500 \u2013 \u20b96,000',duration:'2 Days',bestTime:'Nov \u2013 Apr',tagline:'Forest reserve known for tiger safaris',desc:'A wildlife reserve known for tiger sightings and forest safaris \u2014 a good pick for nature and wildlife lovers.',activities:['Jungle Safari','Nature Walk','Bird Watching','Camping']},
+  {id:'ajanta',image:'/images/ajanta.png',name:'Ajanta Caves',location:'Maharashtra',category:'Heritage',budget:2800,budgetLabel:'\u20b92,500 \u2013 \u20b94,000',duration:'1\u20132 Days',bestTime:'Nov \u2013 Mar',tagline:'Ancient rock-cut Buddhist caves',desc:'Ancient rock-cut Buddhist caves with detailed paintings and sculptures \u2014 a short heritage day trip.',activities:['Cave Tour','Photography','Local Food','Guided Walk']},
+  {id:'omkareshwar',image:'/images/omkareshwar.png',name:'Omkareshwar',location:'Madhya Pradesh',category:'Spirituality',budget:1800,budgetLabel:'\u20b91,500 \u2013 \u20b92,500',duration:'1\u20132 Days',bestTime:'Oct \u2013 Mar',tagline:'Riverside pilgrimage town on a sacred island',desc:'A riverside pilgrimage town centred on a sacred island temple \u2014 suited for a short spiritual getaway.',activities:['Temple Visit','River Walk','Local Food','Boat Ride']},
+  {id:'lonavala',image:'/images/lonavala.png',name:'Lonavala',location:'Maharashtra',category:'Nature',budget:2200,budgetLabel:'\u20b92,000 \u2013 \u20b93,000',duration:'1\u20132 Days',bestTime:'Jun \u2013 Sep',tagline:'Hill town known for waterfalls and viewpoints',desc:'A hill town close to Pune and Mumbai known for waterfalls, viewpoints and an easy monsoon weekend trip.',activities:['Waterfall Visit','Viewpoints','Local Food','Trekking']},
+];
+const categories = ['Nature','Heritage','Wildlife','Spirituality'];
+const catBlurb = {Nature:'Trails & scenery',Heritage:'Forts & monuments',Wildlife:'Parks & safaris',Spirituality:'Temples & shrines'};
+const categoryImage = {Nature:'/images/mahabaleshwar.png',Heritage:'/images/khajuraho.png',Wildlife:'/images/pench.png',Spirituality:'/images/omkareshwar.png'};
+
+let state = {category:'All', currentDestination:'mahabaleshwar', saved:new Set(),
+  plan:{destination:'',duration:'2 Days',budget:'\u20b92,000\u20135,000',travel:'Friends',interests:new Set(['Nature']),accom:'Budget'}};
+
+function imgIcon(){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 16l5-6 4 4 3-5 6 7"/><circle cx="8" cy="7" r="1.4"/></svg>';}
+function pinSvg(){return '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21s7-7.5 7-12a7 7 0 0 0-14 0c0 4.5 7 12 7 12Z"/></svg>';}
+
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  document.querySelectorAll('nav.links button').forEach(b=>b.classList.toggle('active', b.dataset.target===name));
+  window.scrollTo({top:0,behavior:'instant'});
+  if(name==='details') renderDetails();
+}
+
+function selectCategory(cat){
+  state.category = cat;
+  showScreen('explore');
+  applyFilters();
+}
+
+function openDetails(id){
+  state.currentDestination = id;
+  showScreen('details');
+}
+
+function planTrip(id){
+  if(id) state.currentDestination = id;
+  state.plan.destination = state.currentDestination;
+  showScreen('plan');
+  document.getElementById('plan-destination').value = state.plan.destination;
+  updateSummary();
+}
+
+function toggleSave(){
+  const id = state.currentDestination;
+  if(state.saved.has(id)) state.saved.delete(id); else state.saved.add(id);
+  document.getElementById('save-btn').textContent = state.saved.has(id) ? 'Saved \u2713' : 'Save destination';
+}
+
+function renderHome(){
+  document.getElementById('interest-cards').innerHTML = categories.map(c=>`
+    <div class="card" onclick="selectCategory('${c}')">
+      <div class="imgph"><img src="${categoryImage[c]}" alt="${c} travel experience" /></div>
+      <div class="body"><h3>${c}</h3><p class="mini">${catBlurb[c]}</p></div>
+    </div>`).join('');
+  document.getElementById('popular-cards').innerHTML = destinations.slice(0,3).map(d=>`
+    <div class="card dest-card" onclick="openDetails('${d.id}')">
+      <div class="imgph"><img src="${d.image}" alt="${d.name}, ${d.location}" /></div>
+      <div class="body">
+        <h3>${d.name}</h3>
+        <div class="loc">${pinSvg()} ${d.location}</div>
+        <p>${d.tagline}.</p>
+        <button class="btn small" onclick="event.stopPropagation();openDetails('${d.id}')">View details</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderCategoryPills(){
+  const all = ['All',...categories];
+  document.getElementById('category-pills').innerHTML = all.map(c=>
+    `<button class="pill ${state.category===c?'active':''}" onclick="setCategory('${c}')">${c}</button>`).join('');
+}
+function setCategory(c){ state.category=c; renderCategoryPills(); applyFilters(); }
+
+function applyFilters(){
+  renderCategoryPills();
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  const maxBudget = parseInt(document.getElementById('budget-filter').value,10);
+  const sort = document.getElementById('sort-filter').value;
+  let list = destinations.filter(d=>
+    (state.category==='All' || d.category===state.category) &&
+    (d.budget<=maxBudget) &&
+    (q==='' || d.name.toLowerCase().includes(q) || d.location.toLowerCase().includes(q))
+  );
+  if(sort==='budget-asc') list.sort((a,b)=>a.budget-b.budget);
+  else if(sort==='budget-desc') list.sort((a,b)=>b.budget-a.budget);
+  document.getElementById('result-count').textContent = list.length + ' destination' + (list.length!==1?'s':'') + ' found';
+  document.getElementById('explore-results').innerHTML = list.map(d=>`
+    <div class="card dest-card" onclick="openDetails('${d.id}')">
+      <div class="imgph"><img src="${d.image}" alt="${d.name}, ${d.location}" /></div>
+      <div class="body">
+        <h3>${d.name}</h3>
+        <div class="loc">${pinSvg()} ${d.location}</div>
+        <div class="tagrow"><span class="tag">${d.category}</span><strong>${d.budgetLabel.split(' \u2013 ')[0]}</strong></div>
+        <button class="btn small" onclick="event.stopPropagation();openDetails('${d.id}')">View details</button>
+      </div>
+    </div>`).join('') || '<p>No destinations match these filters.</p>';
+}
+
+function renderDetails(){
+  const d = destinations.find(x=>x.id===state.currentDestination);
+  document.getElementById('d-image').src = d.image;
+  document.getElementById('d-image').alt = `${d.name}, ${d.location}`;
+  document.getElementById('d-name').textContent = d.name;
+  document.getElementById('d-tagline').textContent = d.tagline + '.';
+  document.getElementById('d-budget').textContent = d.budgetLabel;
+  document.getElementById('d-duration').textContent = d.duration;
+  document.getElementById('d-besttime').textContent = d.bestTime;
+  document.getElementById('d-location').textContent = d.location;
+  document.getElementById('d-about-h').textContent = 'About ' + d.name;
+  document.getElementById('d-desc').textContent = d.desc;
+  document.getElementById('d-activities').innerHTML = d.activities.map(a=>`
+    <div class="actcard"><h3 style="font-size:13.5px">${a}</h3></div>`).join('');
+  document.getElementById('save-btn').textContent = state.saved.has(d.id) ? 'Saved \u2713' : 'Save destination';
+}
+
+function pillGroup(containerId, options, current, onPick){
+  const el = document.getElementById(containerId);
+  el.innerHTML = options.map(o=>`<button type="button" class="pill ${o===current?'active':''}">${o}</button>`).join('');
+  [...el.children].forEach((btn,i)=>btn.onclick=()=>{onPick(options[i]);});
+}
+
+function renderPlanForm(){
+  const sel = document.getElementById('plan-destination');
+  sel.innerHTML = '<option value="">Select destination</option>' + destinations.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+  sel.value = state.plan.destination;
+  sel.onchange = ()=>{state.plan.destination = sel.value; hideErr(); updateSummary();};
+
+  pillGroup('duration-pills', ['1 Day','2 Days','3 Days','4+ Days'], state.plan.duration, v=>{state.plan.duration=v; renderPlanForm(); updateSummary();});
+  pillGroup('planbudget-pills', ['Under \u20b92,000','\u20b92,000\u20135,000','\u20b95,000\u201310,000','\u20b910,000+'], state.plan.budget, v=>{state.plan.budget=v; renderPlanForm(); updateSummary();});
+  pillGroup('traveltype-pills', ['Solo','Friends','Family','Couple'], state.plan.travel, v=>{state.plan.travel=v; renderPlanForm(); updateSummary();});
+  pillGroup('accom-pills', ['Budget','Standard','Premium'], state.plan.accom, v=>{state.plan.accom=v; renderPlanForm(); updateSummary();});
+
+  const interestOpts = ['Nature','Heritage','Wildlife','Spirituality','Food','Adventure'];
+  document.getElementById('interest-checks').innerHTML = interestOpts.map(i=>`
+    <label class="checklabel"><input type="checkbox" value="${i}" ${state.plan.interests.has(i)?'checked':''} onchange="toggleInterest('${i}')"> ${i}</label>`).join('');
+}
+function toggleInterest(i){
+  if(state.plan.interests.has(i)) state.plan.interests.delete(i); else state.plan.interests.add(i);
+  updateSummary();
+}
+function updateSummary(){
+  const d = destinations.find(x=>x.id===state.plan.destination);
+  document.getElementById('s-dest').textContent = d ? d.name : '\u2014';
+  document.getElementById('s-duration').textContent = state.plan.duration;
+  document.getElementById('s-budget').textContent = state.plan.budget;
+  document.getElementById('s-travel').textContent = state.plan.travel;
+  document.getElementById('s-activities').textContent = state.plan.interests.size ? [...state.plan.interests].join(', ') : '\u2014';
+  document.getElementById('s-accom').textContent = state.plan.accom;
+}
+function hideErr(){ document.getElementById('dest-err').style.display='none'; }
+function createTrip(){
+  if(!state.plan.destination){ document.getElementById('dest-err').style.display='block'; return; }
+  hideErr();
+  updateSummary();
+}
+function viewTripPlan(){
+  if(!state.plan.destination){ document.getElementById('dest-err').style.display='block'; window.scrollTo({top:0,behavior:'smooth'}); return; }
+  const d = destinations.find(x=>x.id===state.plan.destination);
+  const box = document.getElementById('plan-result');
+  document.getElementById('plan-result-text').textContent =
+    `A ${state.plan.duration.toLowerCase()} ${state.plan.travel.toLowerCase()} trip to ${d.name} (${d.location}), budget ${state.plan.budget}, `+
+    `${state.plan.accom.toLowerCase()} accommodation, focused on ${[...state.plan.interests].join(', ')||'general sightseeing'}.`;
+  box.style.display = 'block';
+  box.scrollIntoView({behavior:'smooth'});
+}
+function resetPlan(){
+  state.plan = {destination:'',duration:'2 Days',budget:'\u20b92,000\u20135,000',travel:'Friends',interests:new Set(['Nature']),accom:'Budget'};
+  renderPlanForm(); updateSummary();
+  document.getElementById('plan-result').style.display='none';
+}
+
+renderHome();
+renderCategoryPills();
+applyFilters();
+renderPlanForm();
+updateSummary();
+</script>
+</body>
+</html>
