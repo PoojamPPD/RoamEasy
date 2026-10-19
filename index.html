@@ -6,11 +6,11 @@
 <title>RoamEasy — Tourism Trip Planner (Prototype)</title>
 <style>
 :root{
-  --forest:#1F3D2B; --forest-d:#16291C; --forest-l:#3E6B4F;
-  --cream:#F8F2E4; --surface:#FFFFFF; --surface-2:#F4EFE2;
-  --terra:#C97C5D; --terra-d:#A85C3F;
-  --text:#2B2B2A; --muted:#7A7770; --border:#E4DBC8;
-  --radius:10px;
+  --forest:#174A3A; --forest-d:#10372B; --forest-l:#397A61;
+  --cream:#F7F4ED; --surface:#FFFFFF; --surface-2:#EEF3EE;
+  --terra:#D87552; --terra-d:#B45335;
+  --text:#20302B; --muted:#6D7A74; --border:#D9E2DB;
+  --radius:12px;
 }
 :root:not([data-theme="light"]){
   @media (prefers-color-scheme: dark){
@@ -42,8 +42,8 @@ header.top{
   background:var(--surface); border-bottom:1px solid var(--border); z-index:50;
 }
 .navbar{display:flex;align-items:center;gap:28px;padding:14px 24px;max-width:1120px;margin:0 auto;flex-wrap:wrap}
-.brand{font-weight:700;font-size:18px;color:var(--forest-d);letter-spacing:.2px;margin-right:auto;cursor:pointer;display:flex;align-items:center;gap:8px}
-.brand svg{width:22px;height:22px}
+  .brand{font-weight:800;font-size:18px;color:var(--forest-d);letter-spacing:.2px;margin-right:auto;cursor:pointer;display:flex;align-items:center;gap:8px}
+.brand img{width:30px;height:30px;object-fit:contain}
 nav.links{display:flex;gap:22px;flex-wrap:wrap}
 nav.links button{background:none;border:none;font:inherit;font-size:14.5px;color:var(--muted);cursor:pointer;padding:4px 0;border-bottom:2px solid transparent}
 nav.links button.active{color:var(--forest-d);font-weight:700;border-color:var(--forest-d)}
@@ -136,13 +136,12 @@ footer.site{border-top:1px solid var(--border);padding:30px 0;margin-top:10px}
 <header class="top">
   <div class="navbar">
     <div class="brand" onclick="showScreen('home')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2 2 21h20L12 2Z"/><path d="M12 9v6"/></svg>
+      <img src="/images/roameasy-logo.png" alt="RoamEasy logo" />
       RoamEasy
     </div>
     <nav class="links">
       <button data-target="home" class="active" onclick="showScreen('home')">Home</button>
-      <button data-target="explore" onclick="showScreen('explore')">Explore</button>
-      <button data-target="explore" onclick="showScreen('explore')">Destinations</button>
+      <button data-target="explore" onclick="showScreen('explore')">Explore Destination</button>
       <button data-target="plan" onclick="showScreen('plan')">Plan Your Trip</button>
       <button data-target="about" onclick="showScreen('about')">About</button>
     </nav>
