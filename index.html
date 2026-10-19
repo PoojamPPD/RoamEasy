@@ -136,7 +136,7 @@ footer.site{border-top:1px solid var(--border);padding:30px 0;margin-top:10px}
 <header class="top">
   <div class="navbar">
     <div class="brand" onclick="showScreen('home')">
-      <img src="/images/roameasy-logo.png" alt="RoamEasy logo" />
+      <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1792413840344-0DNSFxdiPAAsf7pcXQUztcaP4IAM67.png" alt="RoamEasy logo" />
       RoamEasy
     </div>
     <nav class="links">
@@ -276,7 +276,27 @@ footer.site{border-top:1px solid var(--border);padding:30px 0;margin-top:10px}
   <div class="planresult" id="plan-result">
     <h3>Your trip plan is ready</h3>
     <p id="plan-result-text"></p>
+    <div class="actions" style="margin-top:16px">
+    <button class="btn primary" onclick="showPayment()">Proceed to payment</button>
     <button class="btn" onclick="resetPlan()">Start over</button>
+  </div>
+  </div>
+</section>
+
+<section id="screen-payment" class="screen">
+  <h1>Complete your booking</h1>
+  <p class="hint" style="margin-top:0">Securely confirm your RoamEasy trip reservation.</p>
+  <div class="formrow">
+    <div class="formcol">
+      <form class="card" style="padding:22px" onsubmit="return submitPayment(event)">
+        <div class="field"><label class="grouplbl" for="payer-name">Cardholder name</label><input id="payer-name" required placeholder="Your full name" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;font:inherit;background:var(--surface);color:var(--text)"></div>
+        <div class="field"><label class="grouplbl" for="card-number">Card number</label><input id="card-number" required inputmode="numeric" maxlength="19" placeholder="4242 4242 4242 4242" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;font:inherit;background:var(--surface);color:var(--text)"></div>
+        <div class="formrow" style="gap:14px"><div class="field" style="flex:1"><label class="grouplbl" for="expiry">Expiry</label><input id="expiry" required placeholder="MM / YY" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;font:inherit;background:var(--surface);color:var(--text)"></div><div class="field" style="flex:1"><label class="grouplbl" for="cvv">CVV</label><input id="cvv" required inputmode="numeric" maxlength="4" placeholder="123" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;font:inherit;background:var(--surface);color:var(--text)"></div></div>
+        <button class="btn primary" type="submit">Pay securely</button>
+        <p id="payment-success" style="display:none;color:var(--forest-d);font-weight:700;margin-bottom:0">Payment successful. Your booking is confirmed.</p>
+      </form>
+    </div>
+    <div class="summary"><h3>Booking summary</h3><div class="row"><span>Destination</span><span id="p-dest">&mdash;</span></div><div class="row"><span>Duration</span><span id="p-duration">&mdash;</span></div><div class="row"><span>Total</span><span id="p-total">&mdash;</span></div></div>
   </div>
 </section>
 
@@ -464,7 +484,22 @@ function viewTripPlan(){
   box.style.display = 'block';
   box.scrollIntoView({behavior:'smooth'});
 }
-function resetPlan(){
+  function showPayment(){
+  if(!state.plan.destination){ document.getElementById('dest-err').style.display='block'; showScreen('plan'); return; }
+  const d = destinations.find(x=>x.id===state.plan.destination);
+  document.getElementById('p-dest').textContent = d.name;
+  document.getElementById('p-duration').textContent = state.plan.duration;
+  document.getElementById('p-total').textContent = state.plan.budget;
+  document.getElementById('payment-success').style.display='none';
+  showScreen('payment');
+  }
+  function submitPayment(event){
+  event.preventDefault();
+  document.getElementById('payment-success').style.display='block';
+  event.target.querySelector('button[type="submit"]').disabled=true;
+  return false;
+  }
+  function resetPlan(){
   state.plan = {destination:'',duration:'2 Days',budget:'\u20b92,000\u20135,000',travel:'Friends',interests:new Set(['Nature']),accom:'Budget'};
   renderPlanForm(); updateSummary();
   document.getElementById('plan-result').style.display='none';
