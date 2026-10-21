@@ -43,7 +43,28 @@ header.top{
 }
 .navbar{display:flex;align-items:center;gap:28px;padding:14px 24px;max-width:1120px;margin:0 auto;flex-wrap:wrap}
   .brand{margin-right:auto;cursor:pointer;display:flex;align-items:center}
-.brand img{width:132px;height:48px;object-fit:contain;display:block}
+  .brand img{width:132px;height:48px;object-fit:contain;display:block}
+.accessibility{position:relative;margin-left:2px}
+.accessibility-trigger{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:999px;color:var(--text);cursor:pointer;font:inherit;font-size:13px;padding:8px 12px}
+.accessibility-trigger:focus-visible,.accessibility-menu button:focus-visible,.accessibility-menu input:focus-visible{outline:3px solid var(--terra);outline-offset:2px}
+.accessibility-trigger svg{width:17px;height:17px}
+.accessibility-menu{position:absolute;right:0;top:calc(100% + 8px);width:286px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 12px 28px rgba(32,48,43,.16);z-index:60}
+.accessibility-menu[hidden]{display:none}
+.accessibility-menu h2{font-size:17px;margin:0 0 14px}
+.accessibility-menu .accessibility-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--border)}
+.accessibility-menu .accessibility-row:first-of-type{border-top:0;padding-top:0}
+.accessibility-menu .accessibility-label{font-size:13px;font-weight:700}
+.accessibility-menu .accessibility-actions{display:flex;gap:6px;flex-wrap:wrap}
+.accessibility-menu .accessibility-actions button,.accessibility-reset{border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);cursor:pointer;font:inherit;font-size:12px;padding:7px 9px}
+.accessibility-menu .accessibility-actions button:hover,.accessibility-reset:hover{border-color:var(--forest)}
+.accessibility-menu input[type=checkbox]{width:18px;height:18px;accent-color:var(--forest-d);cursor:pointer}
+.accessibility-reset{width:100%;margin-top:12px;font-weight:700}
+html.accessibility-large{font-size:110%}
+html.accessibility-small{font-size:92%}
+html.accessibility-contrast body{--cream:#000;--surface:#111;--surface-2:#222;--text:#fff;--muted:#fff;--border:#fff;--forest:#7CFF9B;--forest-d:#7CFF9B;--forest-l:#7CFF9B;--terra:#FFD166;--terra-d:#FFD166}
+html.accessibility-contrast .btn.primary,html.accessibility-contrast .pill.active{color:#000}
+html.accessibility-readable body{letter-spacing:.025em}
+html.accessibility-readable p,html.accessibility-readable button,html.accessibility-readable label,html.accessibility-readable input,html.accessibility-readable select{line-height:1.7}
 nav.links{display:flex;gap:22px;flex-wrap:wrap}
 nav.links button{background:none;border:none;font:inherit;font-size:14.5px;color:var(--muted);cursor:pointer;padding:4px 0;border-bottom:2px solid transparent}
 nav.links button.active{color:var(--forest-d);font-weight:700;border-color:var(--forest-d)}
@@ -146,6 +167,19 @@ footer.site{border-top:1px solid var(--border);padding:30px 0;margin-top:10px}
       <button data-target="about" onclick="showScreen('about')">About</button>
     </nav>
     <button class="searchicon" aria-label="Search" onclick="showScreen('explore')">&#128269;</button>
+    <div class="accessibility">
+      <button class="accessibility-trigger" id="accessibility-trigger" type="button" aria-expanded="false" aria-controls="accessibility-menu">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="5" r="2"/><path d="M9 21l1.5-7L7 12l2-4 3 2 3-2 2 4-3.5 2 1.5 7M8 12H5"/></svg>
+        <span>Accessibility</span>
+      </button>
+      <div class="accessibility-menu" id="accessibility-menu" role="dialog" aria-labelledby="accessibility-title" hidden>
+        <h2 id="accessibility-title">Accessibility settings</h2>
+        <div class="accessibility-row"><span class="accessibility-label">Text size</span><div class="accessibility-actions"><button type="button" id="text-decrease" aria-label="Decrease text size">A−</button><button type="button" id="text-increase" aria-label="Increase text size">A+</button><button type="button" id="text-reset">Reset</button></div></div>
+        <label class="accessibility-row"><span class="accessibility-label">High Contrast Mode</span><input id="contrast-toggle" type="checkbox"></label>
+        <label class="accessibility-row"><span class="accessibility-label">Enhanced Readability</span><input id="readability-toggle" type="checkbox"></label>
+        <button class="accessibility-reset" id="accessibility-reset" type="button">Reset to Default</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -504,6 +538,37 @@ function viewTripPlan(){
   renderPlanForm(); updateSummary();
   document.getElementById('plan-result').style.display='none';
 }
+
+const accessibilityDefaults = {textSize:0, contrast:false, readable:false};
+let accessibilityState = {...accessibilityDefaults};
+function applyAccessibility(){
+  const root = document.documentElement;
+  root.classList.toggle('accessibility-small', accessibilityState.textSize < 0);
+  root.classList.toggle('accessibility-large', accessibilityState.textSize > 0);
+  root.classList.toggle('accessibility-contrast', accessibilityState.contrast);
+  root.classList.toggle('accessibility-readable', accessibilityState.readable);
+  document.getElementById('contrast-toggle').checked = accessibilityState.contrast;
+  document.getElementById('readability-toggle').checked = accessibilityState.readable;
+  try { localStorage.setItem('roameasy-accessibility', JSON.stringify(accessibilityState)); } catch (error) {}
+}
+function resetAccessibility(){ accessibilityState = {...accessibilityDefaults}; applyAccessibility(); }
+try {
+  const savedAccessibility = JSON.parse(localStorage.getItem('roameasy-accessibility') || 'null');
+  if (savedAccessibility) accessibilityState = {...accessibilityDefaults, ...savedAccessibility};
+} catch (error) {}
+const accessibilityTrigger = document.getElementById('accessibility-trigger');
+const accessibilityMenu = document.getElementById('accessibility-menu');
+function closeAccessibilityMenu(){ accessibilityMenu.hidden = true; accessibilityTrigger.setAttribute('aria-expanded','false'); }
+accessibilityTrigger.addEventListener('click',()=>{ const isOpen = !accessibilityMenu.hidden; accessibilityMenu.hidden = isOpen; accessibilityTrigger.setAttribute('aria-expanded', String(!isOpen)); if (!isOpen) accessibilityMenu.querySelector('button,input').focus(); });
+document.addEventListener('click', event=>{ if (!event.target.closest('.accessibility')) closeAccessibilityMenu(); });
+document.addEventListener('keydown', event=>{ if (event.key === 'Escape') { closeAccessibilityMenu(); accessibilityTrigger.focus(); } });
+document.getElementById('text-decrease').addEventListener('click',()=>{ accessibilityState.textSize = Math.max(-1, accessibilityState.textSize - 1); applyAccessibility(); });
+document.getElementById('text-increase').addEventListener('click',()=>{ accessibilityState.textSize = Math.min(1, accessibilityState.textSize + 1); applyAccessibility(); });
+document.getElementById('text-reset').addEventListener('click',()=>{ accessibilityState.textSize = 0; applyAccessibility(); });
+document.getElementById('contrast-toggle').addEventListener('change', event=>{ accessibilityState.contrast = event.target.checked; applyAccessibility(); });
+document.getElementById('readability-toggle').addEventListener('change', event=>{ accessibilityState.readable = event.target.checked; applyAccessibility(); });
+document.getElementById('accessibility-reset').addEventListener('click', resetAccessibility);
+applyAccessibility();
 
 renderHome();
 renderCategoryPills();
